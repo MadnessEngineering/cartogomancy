@@ -331,7 +331,7 @@ function analyzeFile(filePath, projectRoot) {
     }
 
     // Calculate complexity (simple metric: conditionals + loops)
-    const complexity = (content.match(/\b(if|else|for|while|switch|case|catch)\b/g) || []).length;
+    const cyclomaticComplexity = (content.match(/\b(if|else|for|while|switch|case|catch)\b/g) || []).length;
 
     // Get git metrics
     const gitMetrics = getGitMetrics(filePath, projectRoot);
@@ -352,11 +352,27 @@ function analyzeFile(filePath, projectRoot) {
         dependencies,
         extends: extendsClass ? [extendsClass] : [],
         implements: implementsInterfaces,
+        complexity: cyclomaticComplexity, // Top-level for compatibility
+        complexityMetrics: {
+            cyclomaticComplexity,
+            cognitiveComplexity: cyclomaticComplexity, // Simplified - would need proper calculation
+            nestingDepth: 0, // Placeholder
+            linesOfCode: lines,
+            methodCount: methods.length,
+            threatLevel: cyclomaticComplexity > 15 ? 'CRITICAL' : cyclomaticComplexity > 10 ? 'HIGH' : cyclomaticComplexity > 5 ? 'MODERATE' : 'LOW',
+            threatColor: cyclomaticComplexity > 15 ? 'red' : cyclomaticComplexity > 10 ? 'orange' : cyclomaticComplexity > 5 ? 'yellow' : 'green',
+            label: cyclomaticComplexity > 15 ? 'CRITICAL' : cyclomaticComplexity > 10 ? 'HIGH' : cyclomaticComplexity > 5 ? 'MODERATE' : 'LOW',
+            suggestions: []
+        },
+        coverageMetrics: {
+            hasCoverage: false,
+            overallCoverage: 0
+        },
         metrics: {
             lines,
-            complexity,
+            complexity: cyclomaticComplexity,
             methodCount: methods.length,
-            coverage: Math.random() * 100 // Placeholder - would need actual coverage data
+            coverage: 0
         },
         gitMetrics,
         testMetrics: {
@@ -401,6 +417,90 @@ function generateUML(projectPath, projectName) {
         } catch (error) {
             console.warn(`⚠️ Error analyzing ${filePath}: ${error.message}`);
         }
+    }
+
+    // 🔗 CREATE STUB CLASSES FOR EXTERNAL DEPENDENCIES
+    // Find all classes referenced in extends/implements but not defined in codebase
+    const definedClasses = new Set(classes.map(c => c.name));
+    const externalClasses = new Set();
+
+    classes.forEach(classData => {
+        // Check extends
+        if (classData.extends && classData.extends.length > 0) {
+            classData.extends.forEach(parentClass => {
+                if (!definedClasses.has(parentClass)) {
+                    externalClasses.add(parentClass);
+                }
+            });
+        }
+
+        // Check implements
+        if (classData.implements && classData.implements.length > 0) {
+            classData.implements.forEach(interfaceName => {
+                if (!definedClasses.has(interfaceName)) {
+                    externalClasses.add(interfaceName);
+                }
+            });
+        }
+    });
+
+    // Create stub classes for external dependencies
+    if (externalClasses.size > 0) {
+        console.log(`📦 Creating ${externalClasses.size} stub classes for external dependencies`);
+
+        // Create or get external package
+        const externalPkgPath = 'external';
+        if (!packages.has(externalPkgPath)) {
+            packages.set(externalPkgPath, {
+                id: 'package_external',
+                name: 'External Libraries',
+                path: externalPkgPath,
+                classes: []
+            });
+        }
+
+        externalClasses.forEach(className => {
+            const stubClass = {
+                id: `external_${className.replace(/\./g, '_').toLowerCase()}`,
+                name: className,
+                type: 'class',
+                subtype: 'external',
+                package: externalPkgPath,
+                filePath: `external/${className}`,
+                methods: [],
+                fields: [],
+                dependencies: [],
+                extends: [],
+                implements: [],
+                complexity: 0,
+                complexityMetrics: {
+                    cyclomaticComplexity: 0,
+                    cognitiveComplexity: 0,
+                    nestingDepth: 0,
+                    linesOfCode: 75, // Give external stubs modest height (75 lines = ~1.5 units)
+                    methodCount: 0,
+                    threatLevel: 'EXTERNAL',
+                    threatColor: 'gray',
+                    label: 'External Library',
+                    suggestions: []
+                },
+                coverageMetrics: {
+                    hasCoverage: false,
+                    overallCoverage: 0
+                },
+                metrics: {
+                    lines: 75,
+                    complexity: 0,
+                    methodCount: 0,
+                    coverage: 0
+                },
+                isExternal: true
+            };
+
+            classes.push(stubClass);
+            packages.get(externalPkgPath).classes.push(stubClass.id);
+            console.log(`  ✅ Created stub for ${className}`);
+        });
     }
 
     // Get project metadata
