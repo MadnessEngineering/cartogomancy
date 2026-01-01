@@ -21,9 +21,41 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 const { parse: parseComments } = require('comment-parser');
+const ts = require('typescript');
 
 // Configuration from command line
 const args = process.argv.slice(2);
+
+// Check for help flag
+if (args.includes('--help') || args.includes('-h')) {
+    console.log(`
+🔍⚡ SWARMDESK UML GENERATOR
+
+USAGE:
+  node uml-generator.js                          Launch interactive TUI mode
+  node uml-generator.js [path]                   Analyze local directory
+  node uml-generator.js [github-url]             Clone and analyze GitHub repo
+  node uml-generator.js [path] [options]         Analyze with options
+
+OPTIONS:
+  --output <file>         Output JSON file path
+  --include <patterns>    Comma-separated directories to include
+  --exclude <patterns>    Comma-separated patterns to exclude
+  --help, -h              Show this help message
+
+EXAMPLES:
+  node uml-generator.js                                  # Interactive TUI
+  node uml-generator.js .                                # Analyze current dir
+  node uml-generator.js /path/to/project                 # Analyze specific dir
+  node uml-generator.js https://github.com/user/repo     # Analyze GitHub repo
+  node uml-generator.js . --output my-uml.json           # Custom output
+  node uml-generator.js . --include "src,lib"            # Custom patterns
+
+🧙‍♂️ From the Mad Laboratory
+`);
+    process.exit(0);
+}
+
 let targetPath = args[0] || '.';
 let outputFile = null;
 let includePatterns = ['src', 'lib', 'components', 'pages', 'utils', 'hooks', 'services'];
@@ -167,13 +199,86 @@ function findSourceFiles(dir, includes, excludes) {
 }
 
 /**
- * 🔍 Analyze a single file
+ * 🔍 Parse TypeScript/JavaScript file using TS compiler API
+ */
+function parseWithTypeScript(filePath, content) {
+    const ext = path.extname(filePath);
+    const isTypeScript = ['.ts', '.tsx'].includes(ext);
+
+    const sourceFile = ts.createSourceFile(
+        filePath,
+        content,
+        ts.ScriptTarget.Latest,
+        true
+    );
+
+    const result = { classes: [], interfaces: [] };
+
+    function visit(node) {
+        if (ts.isClassDeclaration(node) && node.name) {
+            const className = node.name.getText(sourceFile);
+            const classInfo = { name: className, extends: null, implements: [], methods: [] };
+
+            if (node.heritageClauses) {
+                for (const clause of node.heritageClauses) {
+                    if (clause.token === ts.SyntaxKind.ExtendsKeyword) {
+                        classInfo.extends = clause.types[0].expression.getText(sourceFile);
+                    } else if (clause.token === ts.SyntaxKind.ImplementsKeyword) {
+                        classInfo.implements = clause.types.map(type =>
+                            type.expression.getText(sourceFile)
+                        );
+                    }
+                }
+            }
+
+            node.members.forEach(member => {
+                if (ts.isMethodDeclaration(member) && member.name) {
+                    classInfo.methods.push({
+                        name: member.name.getText(sourceFile),
+                        visibility: 'public',
+                        type: 'method'
+                    });
+                }
+            });
+
+            result.classes.push(classInfo);
+        }
+
+        if (isTypeScript && ts.isInterfaceDeclaration(node) && node.name) {
+            const interfaceName = node.name.getText(sourceFile);
+            const ifaceInfo = { name: interfaceName, extends: [] };
+
+            if (node.heritageClauses) {
+                for (const clause of node.heritageClauses) {
+                    if (clause.token === ts.SyntaxKind.ExtendsKeyword) {
+                        ifaceInfo.extends = clause.types.map(type =>
+                            type.expression.getText(sourceFile)
+                        );
+                    }
+                }
+            }
+
+            result.interfaces.push(ifaceInfo);
+        }
+
+        ts.forEachChild(node, visit);
+    }
+
+    visit(sourceFile);
+    return result;
+}
+
+/**
+ * 🔍 Analyze a single file (Enhanced with TypeScript AST parsing)
  */
 function analyzeFile(filePath, projectRoot) {
     const content = fs.readFileSync(filePath, 'utf8');
     const relativePath = path.relative(projectRoot, filePath);
     const fileName = path.basename(filePath, path.extname(filePath));
     const packagePath = path.dirname(relativePath);
+
+    // Parse with TypeScript compiler API
+    const tsResults = parseWithTypeScript(filePath, content);
 
     // Extract imports
     const dependencies = [];
@@ -184,7 +289,9 @@ function analyzeFile(filePath, projectRoot) {
         // Only track local imports
         if (importPath.startsWith('.') || importPath.startsWith('/')) {
             const depName = path.basename(importPath, path.extname(importPath));
-            dependencies.push(depName);
+            if (!dependencies.includes(depName)) {
+                dependencies.push(depName);
+            }
         }
     }
 
@@ -192,11 +299,36 @@ function analyzeFile(filePath, projectRoot) {
     const isReactComponent = /export\s+(?:default\s+)?(?:function|const|class)\s+(\w+)/.test(content) &&
                             (content.includes('import React') || content.includes('from \'react\''));
 
-    const componentMatch = content.match(/export\s+(?:default\s+)?(?:function|const|class)\s+(\w+)/);
-    const name = componentMatch ? componentMatch[1] : fileName;
+    // Use TypeScript parser results if available, otherwise fallback to regex
+    let name = fileName;
+    let extendsClass = null;
+    let implementsInterfaces = [];
+    let methods = [];
 
-    // Count methods/functions
-    const methodMatches = content.match(/(?:function\s+\w+|const\s+\w+\s*=\s*(?:async\s+)?\([^)]*\)\s*=>|^\s*\w+\s*\([^)]*\)\s*{)/gm) || [];
+    if (tsResults.classes.length > 0) {
+        const mainClass = tsResults.classes[0];
+        name = mainClass.name;
+        extendsClass = mainClass.extends;
+        implementsInterfaces = mainClass.implements || [];
+        methods = mainClass.methods;
+    } else {
+        const componentMatch = content.match(/export\s+(?:default\s+)?(?:function|const|class)\s+(\w+)/);
+        name = componentMatch ? componentMatch[1] : fileName;
+
+        // Regex fallback for extends/implements
+        const extendsMatch = content.match(/class\s+\w+\s+extends\s+(\w+)/);
+        if (extendsMatch) extendsClass = extendsMatch[1];
+
+        const implementsMatch = content.match(/class\s+\w+\s+implements\s+([\w,\s]+)/);
+        if (implementsMatch) implementsInterfaces = implementsMatch[1].split(',').map(s => s.trim());
+
+        const methodMatches = content.match(/(?:function\s+\w+|const\s+\w+\s*=\s*(?:async\s+)?\([^)]*\)\s*=>|^\s*\w+\s*\([^)]*\)\s*{)/gm) || [];
+        methods = methodMatches.map((m, i) => ({
+            name: m.trim().split(/[\s(]/)[1] || `method_${i}`,
+            visibility: 'public',
+            type: 'method'
+        }));
+    }
 
     // Calculate complexity (simple metric: conditionals + loops)
     const complexity = (content.match(/\b(if|else|for|while|switch|case|catch)\b/g) || []).length;
@@ -215,17 +347,15 @@ function analyzeFile(filePath, projectRoot) {
         subtype: isReactComponent ? 'react_component' : 'utility',
         package: packagePath || 'root',
         filePath: relativePath,
-        methods: methodMatches.map((m, i) => ({
-            name: m.trim().split(/[\s(]/)[1] || `method_${i}`,
-            visibility: 'public',
-            type: 'method'
-        })),
+        methods,
         fields: [],
         dependencies,
+        extends: extendsClass ? [extendsClass] : [],
+        implements: implementsInterfaces,
         metrics: {
             lines,
             complexity,
-            methodCount: methodMatches.length,
+            methodCount: methods.length,
             coverage: Math.random() * 100 // Placeholder - would need actual coverage data
         },
         gitMetrics,
@@ -359,7 +489,26 @@ function main() {
 
 // Run if called directly
 if (require.main === module) {
-    main();
+    // Check if running in interactive mode (no arguments) or CLI mode (with arguments)
+    const hasCliArgs = process.argv.length > 2;
+
+    if (!hasCliArgs && process.stdin.isTTY) {
+        // No arguments and in a TTY → Launch TUI mode
+        try {
+            const tui = require('./tui.js');
+            tui.main().catch(error => {
+                console.error(`Fatal error: ${error.message}`);
+                process.exit(1);
+            });
+        } catch (error) {
+            console.error('TUI dependencies not installed. Run: npm install');
+            console.error('Falling back to CLI mode. Use --help for usage.');
+            process.exit(1);
+        }
+    } else {
+        // Arguments provided → Use CLI mode (backwards compatible)
+        main();
+    }
 }
 
 module.exports = { generateUML, analyzeFile, findSourceFiles };

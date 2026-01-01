@@ -7,6 +7,8 @@
     "swarmdesk-uml": "./uml-generator.js"
   },
   "scripts": {
+    "start": "node uml-generator.js",
+    "tui": "node tui.js",
     "generate": "node uml-generator.js",
     "test": "node uml-generator.js . --output test-output.json"
   },
@@ -20,7 +22,15 @@
   "author": "Mad Laboratory",
   "license": "MIT",
   "dependencies": {
-    "comment-parser": "^1.4.1"
+    "boxen": "^5.1.2",
+    "chalk": "^4.1.2",
+    "cli-table3": "^0.6.3",
+    "comment-parser": "^1.4.1",
+    "figlet": "^1.6.0",
+    "gradient-string": "^2.0.2",
+    "inquirer": "^8.2.5",
+    "ora": "^5.4.1",
+    "typescript": "^5.9.3"
   },
   "engines": {
     "node": ">=14.0.0"
