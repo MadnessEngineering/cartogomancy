@@ -592,7 +592,7 @@ function generateUML(projectPath, projectName) {
 /**
  * 🚀 Main execution
  */
-function main() {
+async function main() {
     console.log('🔍⚡ SWARMDESK UML GENERATOR');
     console.log('═══════════════════════════════\n');
 
@@ -679,7 +679,10 @@ if (require.main === module) {
         }
     } else {
         // Arguments provided → Use CLI mode (backwards compatible)
-        main();
+        main().catch(error => {
+            console.error(`Fatal error: ${error.message}`);
+            process.exit(1);
+        });
     }
 }
 
