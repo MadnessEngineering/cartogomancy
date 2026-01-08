@@ -1,18 +1,19 @@
 {
-  "name": "@madnessengineering/uml-generator",
+  "name": "@madnessengineering/cartogomancy",
   "version": "0.2.0",
-  "description": "Standalone UML generator for SwarmDesk 3D code visualization with cloud upload - analyze any JavaScript/TypeScript codebase",
-  "main": "uml-generator.js",
+  "description": "Cartogomancy - The mystical art of code map divination. Generate UML visualizations for SwarmDesk 3D code cities from any JavaScript/TypeScript codebase",
+  "main": "cartogomancy.js",
   "bin": {
-    "swarmdesk-uml": "./uml-generator.js"
+    "cartogomancy": "./cartogomancy.js"
   },
   "scripts": {
-    "start": "node uml-generator.js",
+    "start": "node cartogomancy.js",
     "tui": "node tui.js",
-    "generate": "node uml-generator.js",
-    "test": "node uml-generator.js . --output test-output.json"
+    "generate": "node cartogomancy.js",
+    "test": "node cartogomancy.js . --output test-output.json"
   },
   "keywords": [
+    "cartogomancy",
     "uml",
     "code-visualization",
     "3d",
@@ -26,20 +27,21 @@
     "dependency-graph",
     "static-analysis",
     "cli",
-    "tui"
+    "tui",
+    "code-maps"
   ],
   "author": "Mad Laboratory <contact@madnessinteractive.cc>",
   "license": "MIT",
-  "homepage": "https://github.com/MadTinker/swarmdesk-uml-generator#readme",
+  "homepage": "https://github.com/MadnessEngineering/cartogomancy#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/MadTinker/swarmdesk-uml-generator.git"
+    "url": "https://github.com/MadnessEngineering/cartogomancy.git"
   },
   "bugs": {
-    "url": "https://github.com/MadTinker/swarmdesk-uml-generator/issues"
+    "url": "https://github.com/MadnessEngineering/cartogomancy/issues"
   },
   "files": [
-    "uml-generator.js",
+    "cartogomancy.js",
     "tui.js",
     "lib/",
     "README.md",
