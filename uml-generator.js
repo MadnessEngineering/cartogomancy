@@ -45,7 +45,8 @@ OPTIONS:
   --help, -h              Show this help message
 
 COMMANDS:
-  login                   Login to SwarmDesk account
+  login                   Login to SwarmDesk account (Auth0 device flow)
+  login --api-key <key>   Login with an API key from dashboard
   logout                  Logout from SwarmDesk
   whoami                  Show current login status
   upload <file.json>      Upload existing UML file to SwarmDesk
@@ -67,6 +68,18 @@ EXAMPLES:
 // Check for new auth commands
 if (args[0] === 'login') {
     const authManager = require('./lib/auth');
+    const apiKeyIdx = args.indexOf('--api-key');
+    if (apiKeyIdx !== -1 && args[apiKeyIdx + 1]) {
+        const apiKey = args[apiKeyIdx + 1];
+        if (!apiKey.startsWith('omni_')) {
+            const chalk = require('chalk');
+            console.error(chalk.red('\n❌ Invalid API key format. Keys start with "omni_"\n'));
+            console.log(chalk.gray('  Get your key from: https://madnessinteractive.cc/dashboard > Settings > API Keys\n'));
+            process.exit(1);
+        }
+        authManager.setApiKey(apiKey);
+        process.exit(0);
+    }
     authManager.login().then(success => {
         process.exit(success ? 0 : 1);
     });
@@ -83,14 +96,18 @@ if (args[0] === 'whoami') {
     const authManager = require('./lib/auth');
     const chalk = require('chalk');
 
-    if (authManager.isAuthenticated()) {
+    if (authManager.hasApiKey()) {
+        const user = authManager.getCurrentUser();
+        console.log(chalk.green(`\n✅ Authenticated via API key`));
+        console.log(chalk.gray(`   Key: omni_...${authManager.getApiKey().slice(-8)}\n`));
+    } else if (authManager.isAuthenticated()) {
         const user = authManager.getCurrentUser();
         console.log(chalk.green(`\n✅ Logged in as: ${chalk.bold(user.email)}`));
         console.log(chalk.gray(`   Name: ${user.name}`));
         console.log(chalk.gray(`   ID: ${user.sub}\n`));
     } else {
         console.log(chalk.yellow('\n⚠️  Not logged in\n'));
-        console.log(chalk.gray('   Run: swarmdesk-uml login\n'));
+        console.log(chalk.gray('   Run: cartogomancy login --api-key <key>\n'));
     }
     process.exit(0);
 }
