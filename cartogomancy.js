@@ -142,7 +142,7 @@ if (args[0] === 'upload') {
 
 let targetPath = args[0] || '.';
 let outputFile = null;
-let includePatterns = ['src', 'lib', 'components', 'pages', 'utils', 'hooks', 'services'];
+let includePatterns = ['src', 'lib', 'components', 'pages', 'utils', 'hooks', 'services', 'server', 'client', 'shared', 'app', 'api'];
 let excludePatterns = ['node_modules', 'dist', 'build', '.git', 'coverage', 'test', '__tests__'];
 
 // Analyzer flags
