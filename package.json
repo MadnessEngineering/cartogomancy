@@ -4,7 +4,7 @@
   "description": "Cartogomancy - The mystical art of code map divination. Generate UML visualizations for SwarmDesk 3D code cities from any JavaScript/TypeScript codebase",
   "main": "cartogomancy.js",
   "bin": {
-    "cartogomancy": "./cartogomancy.js"
+    "cartogomancy": "cartogomancy.js"
   },
   "scripts": {
     "start": "node cartogomancy.js",
@@ -35,7 +35,7 @@
   "homepage": "https://github.com/MadnessEngineering/cartogomancy#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/MadnessEngineering/cartogomancy.git"
+    "url": "git+https://github.com/MadnessEngineering/cartogomancy.git"
   },
   "bugs": {
     "url": "https://github.com/MadnessEngineering/cartogomancy/issues"

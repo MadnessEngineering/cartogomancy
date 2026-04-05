@@ -13,7 +13,7 @@ const Table = require('cli-table3');
 const boxen = require('boxen');
 const gradient = require('gradient-string');
 const figlet = require('figlet');
-const { generateUML, analyzeFile, findSourceFiles } = require('./uml-generator.js');
+const { generateUML, analyzeFile, findSourceFiles } = require('./cartogomancy.js');
 
 /**
  * 🎨 Display fancy welcome banner
@@ -286,7 +286,7 @@ async function runAnalysis(projectPath, options) {
 
     // Build UML structure
     const umlData = {
-        version: '6.0',
+        version: '7.0',
         generated: new Date().toISOString(),
         project: {
             name: projectName,

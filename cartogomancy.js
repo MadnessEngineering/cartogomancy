@@ -11,10 +11,10 @@
  * - Git metrics and dependency analysis
  *
  * Usage:
- *   node uml-generator.js /path/to/repo
- *   node uml-generator.js https://github.com/user/repo
- *   node uml-generator.js . --output my-project.json
- *   node uml-generator.js /path/to/repo --include "src,lib" --exclude "test,dist"
+ *   cartogomancy /path/to/repo
+ *   cartogomancy https://github.com/user/repo
+ *   cartogomancy . --output my-project.json
+ *   cartogomancy /path/to/repo --include "src,lib" --exclude "test,dist"
  */
 
 const fs = require('fs');
@@ -40,10 +40,10 @@ if (args.includes('--help') || args.includes('-h')) {
 🔍⚡ SWARMDESK UML GENERATOR
 
 USAGE:
-  node uml-generator.js                          Launch interactive TUI mode
-  node uml-generator.js [path]                   Analyze local directory
-  node uml-generator.js [github-url]             Clone and analyze GitHub repo
-  node uml-generator.js [path] [options]         Analyze with options
+  cartogomancy                                   Launch interactive TUI mode
+  cartogomancy [path]                            Analyze local directory
+  cartogomancy [github-url]                      Clone and analyze GitHub repo
+  cartogomancy [path] [options]                  Analyze with options
 
 OPTIONS:
   --output <file>         Output JSON file path
@@ -64,13 +64,13 @@ COMMANDS:
   upload <file.json>      Upload existing UML file to SwarmDesk
 
 EXAMPLES:
-  node uml-generator.js                                  # Interactive TUI
-  node uml-generator.js .                                # Analyze current dir
-  node uml-generator.js . --upload                       # Analyze and upload
-  node uml-generator.js https://github.com/user/repo     # Analyze GitHub repo
-  node uml-generator.js . --output my-uml.json           # Custom output
-  node uml-generator.js login                            # Login to account
-  node uml-generator.js upload my-project.json           # Upload existing file
+  cartogomancy                                           # Interactive TUI
+  cartogomancy .                                         # Analyze current dir
+  cartogomancy . --upload                                # Analyze and upload
+  cartogomancy https://github.com/user/repo              # Analyze GitHub repo
+  cartogomancy . --output my-uml.json                    # Custom output
+  cartogomancy login                                     # Login to account
+  cartogomancy upload my-project.json                    # Upload existing file
 
 🧙‍♂️ From the Mad Laboratory
 `);
