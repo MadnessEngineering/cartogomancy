@@ -58,7 +58,8 @@ OPTIONS:
 
 COMMANDS:
   login                   Login to SwarmDesk account (Auth0 device flow)
-  login --api-key <key>   Login with an API key from dashboard
+  login <omni_key>        Login with an API key from dashboard
+  login --api-key <key>   Login with an API key (alternate syntax)
   logout                  Logout from SwarmDesk
   whoami                  Show current login status
   upload <file.json>      Upload existing UML file to SwarmDesk
@@ -81,15 +82,15 @@ EXAMPLES:
 if (args[0] === 'login') {
     const authManager = require('./lib/auth');
     const apiKeyIdx = args.indexOf('--api-key');
-    if (apiKeyIdx !== -1 && args[apiKeyIdx + 1]) {
-        const apiKey = args[apiKeyIdx + 1];
-        if (!apiKey.startsWith('omni_')) {
+    const apiKeyArg = apiKeyIdx !== -1 ? args[apiKeyIdx + 1] : (args[1] && args[1].startsWith('omni_') ? args[1] : null);
+    if (apiKeyArg) {
+        if (!apiKeyArg.startsWith('omni_')) {
             const chalk = require('chalk');
             console.error(chalk.red('\n❌ Invalid API key format. Keys start with "omni_"\n'));
             console.log(chalk.gray('  Get your key from: https://madnessinteractive.cc/dashboard > Settings > API Keys\n'));
             process.exit(1);
         }
-        authManager.setApiKey(apiKey);
+        authManager.setApiKey(apiKeyArg);
         process.exit(0);
     }
     authManager.login().then(success => {
@@ -130,7 +131,7 @@ if (args[0] === 'upload') {
 
     if (!filePath) {
         console.error(chalk.red('\n❌ File path required\n'));
-        console.log('Usage: swarmdesk-uml upload <file.json>\n');
+        console.log('Usage: cartogomancy upload <file.json>\n');
         process.exit(1);
     }
 
@@ -767,12 +768,12 @@ async function main() {
             if (!success) {
                 const chalk = require('chalk');
                 console.log(chalk.gray(`📁 Saved locally: ${outputFile}`));
-                console.log(chalk.gray(`   Upload later with: swarmdesk-uml upload ${outputFile}\n`));
+                console.log(chalk.gray(`   Upload later with: cartogomancy upload ${outputFile}\n`));
             }
         } else {
             console.log('\n🎮 Load this file in SwarmDesk to visualize in 3D!');
             const chalk = require('chalk');
-            console.log(chalk.gray('   Or upload to your account: swarmdesk-uml . --upload\n'));
+            console.log(chalk.gray('   Or upload to your account: cartogomancy . --upload\n'));
         }
 
     } catch (error) {

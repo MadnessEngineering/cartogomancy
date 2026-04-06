@@ -1,6 +1,6 @@
-# 🔍⚡ SwarmDesk UML Generator
+# 🔍⚡ Cartogomancy
 
-Standalone UML generator that analyzes any codebase and creates JSON data for 3D visualization in SwarmDesk!
+The mystical art of code map divination. Analyze any codebase and generate JSON data for 3D visualization in SwarmDesk!
 
 ## ✨ Features
 
@@ -16,35 +16,34 @@ Standalone UML generator that analyzes any codebase and creates JSON data for 3D
 ### Installation
 
 ```bash
-cd SwarmDesk
-npm install
+npm install -g @madnessengineering/cartogomancy
 ```
 
 ### Usage Examples
 
 **Analyze local directory:**
 ```bash
-node uml-generator.js /path/to/your/project
+cartogomancy /path/to/your/project
 ```
 
 **Analyze current directory:**
 ```bash
-node uml-generator.js .
+cartogomancy .
 ```
 
 **Analyze GitHub repository:**
 ```bash
-node uml-generator.js https://github.com/facebook/react
+cartogomancy https://github.com/facebook/react
 ```
 
 **Custom output file:**
 ```bash
-node uml-generator.js . --output my-project-uml.json
+cartogomancy . --output my-project-uml.json
 ```
 
 **Filter specific directories:**
 ```bash
-node uml-generator.js . --include "src,components" --exclude "test,dist,node_modules"
+cartogomancy . --include "src,components" --exclude "test,dist,node_modules"
 ```
 
 ## 📋 Command Line Options
@@ -62,7 +61,7 @@ The generator creates a JSON file compatible with SwarmDesk's 3D visualization:
 
 ```json
 {
-  "version": "6.0",
+  "version": "7.0",
   "generated": "2025-10-30T...",
   "project": {
     "name": "my-project",
@@ -97,7 +96,7 @@ The generator creates a JSON file compatible with SwarmDesk's 3D visualization:
 
 1. Generate UML for your project:
    ```bash
-   node uml-generator.js ~/my-project --output my-project-uml.json
+   cartogomancy ~/my-project --output my-project-uml.json
    ```
 
 2. Copy the output file to SwarmDesk data directory:
@@ -143,9 +142,9 @@ npm test
 
 ## 🔮 Future Enhancements
 
-- [ ] TypeScript type extraction
+- [x] TypeScript type extraction
+- [x] Test coverage integration
 - [ ] JSDoc comment parsing
-- [ ] Test coverage integration
 - [ ] Multiple project comparison
 - [ ] Private GitHub repo support (with tokens)
 - [ ] GitLab/Bitbucket support

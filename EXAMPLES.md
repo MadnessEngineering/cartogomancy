@@ -1,37 +1,37 @@
-# 🔍 SwarmDesk UML Generator - Examples
+# 🔍 Cartogomancy - Examples
 
 ## 📚 Real-World Examples
 
 ### 1. Analyze Inventorium (Current Project)
 ```bash
-node uml-generator.js .. --output inventorium-uml.json
+cartogomancy .. --output inventorium-uml.json
 ```
 
 ### 2. Analyze Just the Components Directory
 ```bash
-node uml-generator.js ../src/components --output components-only.json
+cartogomancy ../src/components --output components-only.json
 ```
 
 ### 3. Analyze a Public GitHub Repo (React)
 ```bash
 # Note: This clones the repo temporarily, analyzes it, then cleans up
-node uml-generator.js https://github.com/facebook/react
+cartogomancy https://github.com/facebook/react
 ```
 
 ### 4. Analyze Three.js Library
 ```bash
-node uml-generator.js https://github.com/mrdoob/three.js --output three-uml.json
+cartogomancy https://github.com/mrdoob/three.js --output three-uml.json
 ```
 
 ### 5. Analyze Your Own GitHub Project
 ```bash
-node uml-generator.js https://github.com/yourusername/your-project
+cartogomancy https://github.com/yourusername/your-project
 ```
 
 ### 6. Custom Include/Exclude Patterns
 ```bash
 # Only analyze source code, skip tests and config
-node uml-generator.js . \
+cartogomancy . \
   --include "src,lib" \
   --exclude "test,__tests__,config,scripts,node_modules"
 ```
@@ -39,9 +39,9 @@ node uml-generator.js . \
 ### 7. Analyze Multiple Related Projects
 ```bash
 # Generate UML for each project in your workspace
-node uml-generator.js ~/projects/frontend --output frontend-uml.json
-node uml-generator.js ~/projects/backend --output backend-uml.json
-node uml-generator.js ~/projects/shared --output shared-uml.json
+cartogomancy ~/projects/frontend --output frontend-uml.json
+cartogomancy ~/projects/backend --output backend-uml.json
+cartogomancy ~/projects/shared --output shared-uml.json
 ```
 
 ## 🎮 Loading in SwarmDesk
@@ -49,7 +49,7 @@ node uml-generator.js ~/projects/shared --output shared-uml.json
 ### Method 1: Copy to Data Directory
 ```bash
 # Generate UML
-node uml-generator.js ~/my-project --output my-project-uml.json
+cartogomancy ~/my-project --output my-project-uml.json
 
 # Copy to SwarmDesk data folder
 cp my-project-uml.json ../public/data/
@@ -73,7 +73,7 @@ open http://localhost:3000?uml=my-project-uml.json
 ### GitHub Private Repos (Future Enhancement)
 ```bash
 # Not yet implemented, but planned:
-# node uml-generator.js https://github.com/private/repo --token YOUR_TOKEN
+# cartogomancy https://github.com/private/repo --token YOUR_TOKEN
 ```
 
 ### With Custom NPM Script
@@ -81,7 +81,7 @@ Add to your project's `package.json`:
 ```json
 {
   "scripts": {
-    "visualize": "node ../SwarmDesk/uml-generator.js . --output ../public/data/my-uml.json"
+    "visualize": "cartogomancy . --output ../public/data/my-uml.json"
   }
 }
 ```
@@ -103,8 +103,8 @@ jobs:
       - uses: actions/checkout@v2
       - name: Generate UML
         run: |
-          npm install comment-parser
-          node tools/uml-generator.js . --output visualization.json
+          npm install -g @madnessengineering/cartogomancy
+          cartogomancy . --output visualization.json
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
@@ -153,7 +153,7 @@ Press `F7` to toggle animated arrows showing data flow direction!
 ### Scenario 1: Exploring a New Codebase
 ```bash
 # First time seeing a large React app
-node uml-generator.js https://github.com/company/new-project
+cartogomancy https://github.com/company/new-project
 
 # Explore in 3D:
 # 1. See package structure (tall vs short buildings)
@@ -164,10 +164,10 @@ node uml-generator.js https://github.com/company/new-project
 ### Scenario 2: Architecture Review
 ```bash
 # Generate UML before refactoring
-node uml-generator.js . --output before-refactor.json
+cartogomancy . --output before-refactor.json
 
 # After refactoring
-node uml-generator.js . --output after-refactor.json
+cartogomancy . --output after-refactor.json
 
 # Compare visually in SwarmDesk
 ```
@@ -175,7 +175,7 @@ node uml-generator.js . --output after-refactor.json
 ### Scenario 3: Onboarding New Developers
 ```bash
 # Generate visualization
-node uml-generator.js . --output team-codebase.json
+cartogomancy . --output team-codebase.json
 
 # Share the 3D view:
 # - New devs can literally "walk through" the code
@@ -191,7 +191,7 @@ node uml-generator.js . --output team-codebase.json
 ls /path/to/project  # Verify it exists
 
 # Use absolute paths if relative paths aren't working
-node uml-generator.js /absolute/path/to/project
+cartogomancy /absolute/path/to/project
 ```
 
 ### Error: "git command not found"
@@ -205,7 +205,7 @@ Non-critical. The generator will use directory name as project name.
 # For large repos, git clone might timeout
 # Try cloning manually first:
 git clone --depth 1 https://github.com/large/repo temp-repo
-node uml-generator.js temp-repo
+cartogomancy temp-repo
 ```
 
 ## 🚀 Performance Tips
@@ -220,21 +220,21 @@ node uml-generator.js temp-repo
 ### Create Themed Outputs
 ```bash
 # Frontend only
-node uml-generator.js . --include "components,pages" --output frontend.json
+cartogomancy . --include "components,pages" --output frontend.json
 
 # Backend only
-node uml-generator.js . --include "api,services,models" --output backend.json
+cartogomancy . --include "api,services,models" --output backend.json
 
 # Core utilities
-node uml-generator.js . --include "utils,lib,helpers" --output core.json
+cartogomancy . --include "utils,lib,helpers" --output core.json
 ```
 
 ### Compare Frameworks
 ```bash
 # Visualize different framework patterns
-node uml-generator.js https://github.com/react-project --output react-app.json
-node uml-generator.js https://github.com/vue-project --output vue-app.json
-node uml-generator.js https://github.com/angular-project --output angular-app.json
+cartogomancy https://github.com/react-project --output react-app.json
+cartogomancy https://github.com/vue-project --output vue-app.json
+cartogomancy https://github.com/angular-project --output angular-app.json
 ```
 
 ## 📝 Notes
