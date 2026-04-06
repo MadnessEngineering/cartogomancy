@@ -1,6 +1,6 @@
 {
   "name": "@madnessengineering/cartogomancy",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Cartogomancy - The mystical art of code map divination. Generate UML visualizations for SwarmDesk 3D code cities from any JavaScript/TypeScript codebase",
   "main": "cartogomancy.js",
   "bin": {
