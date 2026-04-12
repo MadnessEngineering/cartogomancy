@@ -53,6 +53,8 @@ OPTIONS:
   --no-git                Skip git history analysis (faster)
   --no-imports            Skip import/export dead code analysis
   --no-redundancy         Skip redundancy/similarity detection
+  --no-mad-tinker         Skip possibility analysis (Mad Tinker)
+  --wildness <1-10>       Mad Tinker wildness dial — 1=adjacent, 10=edge of map (default: 5)
   --coverage-path <path>  Path to coverage-summary.json
   --help, -h              Show this help message
 
@@ -150,6 +152,8 @@ let excludePatterns = ['node_modules', 'dist', 'build', '.git', 'coverage', 'tes
 let skipGit = args.includes('--no-git');
 let skipImports = args.includes('--no-imports');
 let skipRedundancy = args.includes('--no-redundancy');
+let skipMadTinker = args.includes('--no-mad-tinker');
+let wildness = 5;
 let coveragePath = null;
 
 // Parse command line arguments
@@ -165,6 +169,9 @@ for (let i = 1; i < args.length; i++) {
         i++;
     } else if (args[i] === '--coverage-path' && args[i + 1]) {
         coveragePath = args[i + 1];
+        i++;
+    } else if (args[i] === '--wildness' && args[i + 1]) {
+        wildness = Math.max(1, Math.min(10, parseInt(args[i + 1], 10) || 5));
         i++;
     }
 }
@@ -698,7 +705,9 @@ function generateUML(projectPath, projectName) {
     umlData = AnalysisSummary.attachToUML(umlData, {
         importAnalyzer: analyzers.importAnalyzer,
         redundancyAnalyzer,
-        projectRoot: projectPath
+        projectRoot: projectPath,
+        noMadTinker: skipMadTinker,
+        wildness,
     });
 
     // Log git analyzer cache stats
@@ -708,7 +717,7 @@ function generateUML(projectPath, projectName) {
     }
 
     // Log analysis section status
-    const sections = ['complexityAnalysis', 'gitAnalysis', 'importAnalysis', 'redundancyAnalysis'];
+    const sections = ['complexityAnalysis', 'gitAnalysis', 'importAnalysis', 'redundancyAnalysis', 'possibilityAnalysis'];
     sections.forEach(section => {
         const status = umlData[section] ? '✅' : '⬜';
         console.log(`${status} ${section}`);
