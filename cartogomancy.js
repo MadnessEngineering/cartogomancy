@@ -454,22 +454,29 @@ function analyzeFile(filePath, projectRoot, analyzers = {}) {
         const implementsMatch = content.match(/class\s+\w+\s+implements\s+([\w,\s]+)/);
         if (implementsMatch) implementsInterfaces = implementsMatch[1].split(',').map(s => s.trim());
 
-        // Enhanced regex method extraction with async detection
-        const methodMatches = content.match(/(?:(?:async\s+)?function\s+\w+|(?:export\s+)?(?:async\s+)?(?:const|let)\s+\w+\s*=\s*(?:async\s+)?\([^)]*\)\s*=>|^\s*(?:async\s+)?\w+\s*\([^)]*\)\s*{)/gm) || [];
-        methods = methodMatches.map((m, i) => {
-            const isAsync = m.includes('async');
-            const nameMatch = m.match(/(?:function|const|let)\s+(\w+)|^\s*(\w+)\s*\(/);
-            return {
-                name: nameMatch ? (nameMatch[1] || nameMatch[2]) : `method_${i}`,
-                visibility: 'public',
-                type: 'method',
-                isAsync,
-                isStatic: false,
-                parameters: [],
-                returnType: null,
-                signature: m.trim().substring(0, 60)
-            };
-        });
+        // Enhanced regex method extraction with async detection.
+        // Guard against control-flow statements (if/for/while/etc.) being misread as methods.
+        const methodMatches = content.match(
+            /(?:(?:async\s+)?function\s+\w+|(?:export\s+)?(?:async\s+)?(?:const|let)\s+\w+\s*=\s*(?:async\s+)?\([^)]*\)\s*=>|^\s*(?:async\s+)?(?!if\b|for\b|while\b|switch\b|catch\b|else\b|try\b|do\b)\w+\s*\([^)]*\)\s*{)/gm
+        ) || [];
+        const controlFlowSignatureRegex = /^(?:if|for|while|switch|catch|else|try|do)\b/;
+        methods = methodMatches
+            .map((m, i) => {
+                const isAsync = m.includes('async');
+                const signature = m.trim().substring(0, 60);
+                const nameMatch = m.match(/(?:function|const|let)\s+(\w+)|^\s*(\w+)\s*\(/);
+                return {
+                    name: nameMatch ? (nameMatch[1] || nameMatch[2]) : `method_${i}`,
+                    visibility: 'public',
+                    type: 'method',
+                    isAsync,
+                    isStatic: false,
+                    parameters: [],
+                    returnType: null,
+                    signature
+                };
+            })
+            .filter(method => !controlFlowSignatureRegex.test(method.signature));
     }
 
     // Use ComplexityAnalyzer for real metrics (replaces keyword counting)
