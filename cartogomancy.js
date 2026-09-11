@@ -682,7 +682,6 @@ function generateUML(projectPath, projectName) {
     if (fs.existsSync(packageJsonPath)) {
         try {
             const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
-            projectName = packageJson.name || projectName;
             projectDescription = packageJson.description || projectDescription;
         } catch (error) {
             console.warn(`⚠️ Could not read package.json: ${error.message}`);
