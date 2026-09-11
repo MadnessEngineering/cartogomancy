@@ -407,7 +407,7 @@ function analyzeFile(filePath, projectRoot, analyzers = {}) {
 
     // Extract imports (dependency names for city connections)
     const dependencies = [];
-    const importRegex = /import\s+(?:{[^}]+}|[\w]+|\*\s+as\s+\w+)?\s*(?:,\s*{[^}]+})?\s*from\s+['"]([^'"]+)['"]/g;
+    const importRegex = /import\s+(?:type\s+)?(?:{[^}]+}|[\w]+|\*\s+as\s+\w+)?\s*(?:,\s*(?:type\s+)?{[^}]+})?\s*from\s+['"]([^'"]+)['"]/g;
     let match;
     while ((match = importRegex.exec(content)) !== null) {
         const importPath = match[1];
